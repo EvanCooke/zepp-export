@@ -1,7 +1,5 @@
 # zepp-export
 
-**Your health data. Your rules.**
-
 Open-source Python library and tools for accessing your Amazfit/Zepp health data. No official API needed -- we reverse-engineered the Zepp Cloud API so you don't have to.
 
 ## What data can you access?
@@ -60,6 +58,12 @@ python -m zepp_export pull --type heart-rate --from 2026-02-06
 
 # Export to CSV
 python -m zepp_export export --format csv --from 2026-02-01 --to 2026-02-07
+
+# Export to Apple Health XML
+python -m zepp_export export --format apple-health --from 2026-02-01 --to 2026-02-07
+
+# Launch the local dashboard
+python -m zepp_export serve --port 8080
 
 # Check account status
 python -m zepp_export status
@@ -190,12 +194,36 @@ pip install pytest
 pytest tests/
 ```
 
+## Local Dashboard
+
+Run `python -m zepp_export serve` to launch a local web dashboard at `http://localhost:8080` with:
+
+- **Daily Summary Cards**: Steps, resting HR, sleep score, average stress at a glance
+- **Heart Rate Timeline**: Minute-by-minute HR with zone-based coloring
+- **Sleep Architecture**: Stacked bar showing light/deep/REM/awake duration
+- **Stress Timeline**: 5-minute intervals with colored zones (relaxed/normal/medium/high)
+- **Training Load Chart**: ATL (fatigue) vs CTL (fitness) over time with TSB balance -- the "free TrainingPeaks" feature
+
+Data is cached in `~/.zepp-export/data/` as dated JSON files, so the dashboard loads instantly after the first fetch and data persists across restarts.
+
+The server also exposes clean REST endpoints you can use with any tool (Grafana, Home Assistant, custom scripts):
+
+```
+GET /api/heart-rate/2026-02-06
+GET /api/sleep/2026-02-06
+GET /api/steps/2026-02-06
+GET /api/stress/2026-02-06
+GET /api/training-load
+GET /api/sport-load
+GET /api/summary/2026-02-06
+```
+
 ## Roadmap
 
 - **v0.1**: Python library with all data endpoints
-- **v0.2** (current): CLI tool (`python -m zepp_export pull`), CSV export, guided login
-- **v0.3**: Apple Health XML export (HR + steps, then sleep stages)
-- **v0.4**: Local API server, personal dashboard with training load charts
+- **v0.2**: CLI tool, CSV export, Apple Health XML export, guided login
+- **v0.3** (current): Local API server, personal dashboard with training load charts
+- **v0.4**: Grafana integration, more export formats, SpO2/temperature endpoints
 
 ## Contributing
 

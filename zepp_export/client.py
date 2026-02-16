@@ -277,10 +277,10 @@ class ZeppClient:
         result = {
             "date": date,
             "fetched_from": best_source_date,
-            "resting_hr": best_sleep.get("rhr"),
-            "sleep_score": best_sleep.get("ss"),
-            "deep_minutes": best_sleep.get("dp"),
-            "light_minutes": best_sleep.get("lt"),
+            "resting_hr": best_sleep.get("rhr") or None,
+            "sleep_score": best_sleep.get("ss") or None,
+            "deep_minutes": best_sleep.get("dp") or None,
+            "light_minutes": best_sleep.get("lt") or None,
             "stages": stages,
             "nap_stages": nap_stages,
         }
@@ -291,6 +291,26 @@ class ZeppClient:
             result["start"] = start.isoformat()
             result["end"] = end.isoformat()
             result["duration_minutes"] = int((end - start).total_seconds() / 60)
+
+        # Compute nap totals from stage data
+        if nap_stages:
+            result["nap_duration_minutes"] = sum(
+                s["duration_minutes"] for s in nap_stages
+            )
+
+        # If main stages are empty but nap stages exist, the API stored
+        # overnight sleep in odd_stage. Compute summary metrics from it
+        # since the top-level fields (ss, dp, lt, rhr) will be zeroed.
+        if not stages and nap_stages:
+            total_mins = sum(s["duration_minutes"] for s in nap_stages)
+            deep = sum(s["duration_minutes"] for s in nap_stages if s["stage"] == "deep")
+            light = sum(s["duration_minutes"] for s in nap_stages if s["stage"] == "light")
+            rem = sum(s["duration_minutes"] for s in nap_stages if s["stage"] == "rem")
+
+            result["duration_minutes"] = result.get("duration_minutes") or total_mins
+            result["deep_minutes"] = result.get("deep_minutes") or deep
+            result["light_minutes"] = result.get("light_minutes") or light
+            result["rem_minutes"] = rem
 
         return result
 

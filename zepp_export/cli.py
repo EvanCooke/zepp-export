@@ -4,6 +4,7 @@ Usage:
     python -m zepp_export pull --from 2026-02-01 --to 2026-02-07
     python -m zepp_export pull --type heart-rate --from 2026-02-06
     python -m zepp_export export --format csv --from 2026-02-01 --output data.csv
+    python -m zepp_export serve --port 8080
     python -m zepp_export login
     python -m zepp_export status
 """
@@ -494,6 +495,25 @@ def cmd_login(args):
         print(f"  Connection issue: {e}")
 
 
+def cmd_serve(args):
+    """Start the local API server and dashboard."""
+    client = get_client()
+    port = args.port or 8080
+
+    from .server import create_app
+
+    app = create_app(client)
+    print(f"zepp-export v{__version__} local server")
+    print(f"Dashboard:  http://localhost:{port}")
+    print(f"API:        http://localhost:{port}/api/heart-rate/2026-02-06")
+    print(f"Cache dir:  {Path.home() / '.zepp-export' / 'data'}")
+    print()
+    print("Press Ctrl+C to stop.")
+    print()
+
+    app.run(host="127.0.0.1", port=port, debug=False, threaded=True)
+
+
 def cmd_status(args):
     """Show current credential status and account info."""
     print(f"zepp-export v{__version__}")
@@ -573,6 +593,11 @@ def build_parser():
                               default="json", help="Output format (default: json)")
     export_parser.add_argument("--output", "-o", help="Output file path")
 
+    # serve
+    serve_parser = subparsers.add_parser("serve", help="Start local API server and dashboard")
+    serve_parser.add_argument("--port", "-p", type=int, default=8080,
+                              help="Port to run the server on (default: 8080)")
+
     # login
     subparsers.add_parser("login", help="Set up Zepp API credentials")
 
@@ -590,6 +615,8 @@ def main():
         cmd_pull(args)
     elif args.command == "export":
         cmd_export(args)
+    elif args.command == "serve":
+        cmd_serve(args)
     elif args.command == "login":
         cmd_login(args)
     elif args.command == "status":

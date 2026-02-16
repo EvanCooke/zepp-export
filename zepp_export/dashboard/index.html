@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>zepp-export Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <h1>zepp-export</h1>
+        <span class="subtitle">Personal Health Dashboard</span>
+    </div>
+    <div class="header-right">
+        <button id="btn-prev" class="nav-btn" title="Previous day">&larr;</button>
+        <input type="date" id="date-picker">
+        <button id="btn-next" class="nav-btn" title="Next day">&rarr;</button>
+        <button id="btn-today" class="nav-btn">Today</button>
+    </div>
+</header>
+
+<div id="sync-banner" class="sync-banner hidden"></div>
+
+<main>
+    <!-- Primary Summary Cards -->
+    <section id="summary-cards" class="card-row">
+        <div class="card summary-card" id="card-steps">
+            <div class="card-label">Steps</div>
+            <div class="card-value" id="val-steps">--</div>
+            <div class="card-detail" id="detail-steps"></div>
+        </div>
+        <div class="card summary-card" id="card-rhr">
+            <div class="card-label">Resting HR</div>
+            <div class="card-value" id="val-rhr">--</div>
+            <div class="card-detail">bpm</div>
+        </div>
+        <div class="card summary-card" id="card-sleep">
+            <div class="card-label">Sleep Score</div>
+            <div class="card-value" id="val-sleep">--</div>
+            <div class="card-detail" id="detail-sleep"></div>
+        </div>
+        <div class="card summary-card" id="card-stress">
+            <div class="card-label">Avg Stress</div>
+            <div class="card-value" id="val-stress">--</div>
+            <div class="card-detail" id="detail-stress"></div>
+        </div>
+    </section>
+
+    <!-- Secondary Summary Cards -->
+    <section id="secondary-cards" class="card-row-secondary">
+        <div class="card secondary-card">
+            <span class="sec-label">Calories</span>
+            <span class="sec-value" id="val-calories">--</span>
+            <span class="sec-unit">kcal</span>
+        </div>
+        <div class="card secondary-card">
+            <span class="sec-label">Distance</span>
+            <span class="sec-value" id="val-distance">--</span>
+            <span class="sec-unit">km</span>
+        </div>
+        <div class="card secondary-card">
+            <span class="sec-label">Deep Sleep</span>
+            <span class="sec-value" id="val-deep">--</span>
+            <span class="sec-unit" id="unit-deep">min</span>
+        </div>
+        <div class="card secondary-card">
+            <span class="sec-label">Max HR</span>
+            <span class="sec-value" id="val-maxhr">--</span>
+            <span class="sec-unit">bpm</span>
+        </div>
+        <div class="card secondary-card">
+            <span class="sec-label">Step Goal</span>
+            <span class="sec-value" id="val-goal">--</span>
+            <span class="sec-unit" id="unit-goal"></span>
+        </div>
+        <div class="card secondary-card">
+            <span class="sec-label">Recovery</span>
+            <span class="sec-value" id="val-recovery">--</span>
+            <span class="sec-unit" id="unit-recovery"></span>
+        </div>
+    </section>
+
+    <!-- Download toolbar -->
+    <section class="download-bar">
+        <button id="btn-dl-summary" class="dl-btn" title="Download a one-row summary CSV">Download Summary CSV</button>
+        <button id="btn-dl-raw" class="dl-btn" title="Download all minute-by-minute readings">Download Raw CSV</button>
+    </section>
+
+    <!-- Heart Rate Timeline -->
+    <section class="card chart-card">
+        <h2>Heart Rate Timeline</h2>
+        <div class="chart-container">
+            <canvas id="chart-hr"></canvas>
+        </div>
+        <div class="chart-legend" id="hr-legend"></div>
+    </section>
+
+    <!-- Sleep Architecture -->
+    <section class="card chart-card">
+        <h2>Sleep Architecture</h2>
+        <div class="chart-container chart-container-sm">
+            <canvas id="chart-sleep"></canvas>
+        </div>
+        <div class="sleep-stats" id="sleep-stats"></div>
+    </section>
+
+    <!-- Stress Timeline -->
+    <section class="card chart-card">
+        <h2>Stress Timeline</h2>
+        <div class="chart-container">
+            <canvas id="chart-stress"></canvas>
+        </div>
+    </section>
+
+    <!-- Activity Segments -->
+    <section class="card chart-card">
+        <h2>Activity Segments</h2>
+        <div class="chart-container chart-container-sm">
+            <canvas id="chart-activity"></canvas>
+        </div>
+        <div class="activity-stats" id="activity-stats"></div>
+    </section>
+
+    <!-- Training Load -->
+    <section class="card chart-card">
+        <h2>Training Load (ATL / CTL / TSB)</h2>
+        <p class="chart-desc">Acute Training Load vs Chronic Training Load. TSB indicates freshness (positive) or fatigue (negative).</p>
+        <div class="chart-container">
+            <canvas id="chart-training"></canvas>
+        </div>
+    </section>
+
+    <!-- Sport Load -->
+    <section class="card chart-card">
+        <h2>Sport Load</h2>
+        <p class="chart-desc">Daily and weekly training load with optimal range.</p>
+        <div class="chart-container">
+            <canvas id="chart-sport-load"></canvas>
+        </div>
+    </section>
+
+    <!-- TRIMP -->
+    <section class="card chart-card">
+        <h2>TRIMP (Training Impulse)</h2>
+        <p class="chart-desc">Daily training stress derived from heart rate data.</p>
+        <div class="chart-container">
+            <canvas id="chart-trimp"></canvas>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <p>Powered by <a href="https://github.com/evankp/zepp-export" target="_blank">zepp-export</a> &mdash; Your health data belongs to you.</p>
+</footer>
+
+<div id="loading-overlay" class="loading-overlay hidden">
+    <div class="spinner"></div>
+    <p>Loading data...</p>
+</div>
+
+<script src="/static/app.js"></script>
+<script src="/static/heart-rate.js"></script>
+<script src="/static/sleep.js"></script>
+<script src="/static/stress.js"></script>
+<script src="/static/activity.js"></script>
+<script src="/static/training-load.js"></script>
+<script src="/static/sport-load.js"></script>
+<script src="/static/trimp.js"></script>
+</body>
+</html>
