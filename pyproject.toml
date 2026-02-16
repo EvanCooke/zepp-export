@@ -1,6 +1,6 @@
 [project]
 name = "zepp-export"
-version = "0.1.0"
+version = "0.2.0"
 description = "Open-source tools for accessing your Amazfit/Zepp health data"
 requires-python = ">=3.9"
 license = {text = "MIT"}

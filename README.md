@@ -43,7 +43,29 @@ cp .env.example .env
 # Edit .env with your token and user ID
 ```
 
-### 3. Use it
+### 3. Use the CLI
+
+```bash
+# Set up credentials (guided flow)
+python -m zepp_export login
+
+# Pull all health data for a date
+python -m zepp_export pull --from 2026-02-06
+
+# Pull a date range
+python -m zepp_export pull --from 2026-02-01 --to 2026-02-07
+
+# Pull specific data type
+python -m zepp_export pull --type heart-rate --from 2026-02-06
+
+# Export to CSV
+python -m zepp_export export --format csv --from 2026-02-01 --to 2026-02-07
+
+# Check account status
+python -m zepp_export status
+```
+
+### Or use the Python library
 
 ```python
 from zepp_export import ZeppClient
@@ -170,9 +192,10 @@ pytest tests/
 
 ## Roadmap
 
-- **v0.1** (current): Python library with all data endpoints
-- **v0.2**: CLI tool (`python -m zepp_export pull`), CSV export, guided login
-- **v0.3**: Local API server, Apple Health XML export, personal dashboard
+- **v0.1**: Python library with all data endpoints
+- **v0.2** (current): CLI tool (`python -m zepp_export pull`), CSV export, guided login
+- **v0.3**: Apple Health XML export (HR + steps, then sleep stages)
+- **v0.4**: Local API server, personal dashboard with training load charts
 
 ## Contributing
 
